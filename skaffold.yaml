@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/jenkinsxworkshop/springforward:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/jenkinsxworkshop/springforward:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: springforward
+        chartPath: charts/springforward
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/jenkinsxworkshop/springforward'
+          image.tag: '{{.DIGEST_HEX}}'
